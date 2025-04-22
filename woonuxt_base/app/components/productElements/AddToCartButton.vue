@@ -33,7 +33,7 @@ const handleAddToCart = async () => {
 <template>
   <button
     type="button"
-    class="rounded-lg flex font-bold bg-gray-800 text-white text-center min-w-[150px] p-2.5 gap-4 items-center justify-center focus:outline-none"
+    class="w-full rounded-lg font-bold bg-green-600 text-white text-center p-4 gap-4 items-center justify-center focus:outline-none hover:bg-green-400 transition-all duration-200 disabled:cursor-not-allowed disabled:bg-gray-400 flex"
     :class="{ disabled: disabled || isLoading }"
     :disabled="disabled || isLoading"
     @click="handleAddToCart"

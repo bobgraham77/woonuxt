@@ -1,4 +1,15 @@
 <script lang="ts" setup>
+import { nextTick } from 'vue';
+
+function scrollToReviews() {
+  nextTick(() => {
+    const el = document.getElementById('product-reviews');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+}
+
 import { StockStatusEnum, ProductTypesEnum, type AddToCartInput } from '#woo';
 
 const route = useRoute();
@@ -167,15 +178,15 @@ function onAddToCartSuccess() {
         <NuxtImg v-else class="relative flex-1 skeleton" src="/images/placeholder.jpg" :alt="product?.name || 'Product'" />
 
         <div class="lg:max-w-md xl:max-w-lg md:py-2 w-full">
-          <div class="flex justify-between mb-4">
-            <div class="flex-1">
-              <h1 class="flex flex-wrap items-center gap-2 mb-2 text-2xl font-sesmibold">
-                {{ safeType?.name || '' }}
-                <LazyWPAdminLink :link="`/wp-admin/post.php?post=${product?.databaseId || 0}&action=edit`">Edit</LazyWPAdminLink>
-              </h1>
-              <StarRating :rating="product?.averageRating || 0" :count="product?.reviewCount || 0" v-if="storeSettings.showReviews" />
-            </div>
-            <ProductPrice class="text-xl" :sale-price="safeType?.salePrice || '0'" :regular-price="safeType?.regularPrice || '0'" />
+          <div class="mb-4">
+            <h1 class="flex flex-wrap items-center gap-2 mb-2 text-2xl font-sesmibold">
+              {{ safeType?.name || '' }}
+              <LazyWPAdminLink :link="`/wp-admin/post.php?post=${product?.databaseId || 0}&action=edit`">Edit</LazyWPAdminLink>
+            </h1>
+            <ProductPrice class="text-xl text-left block mb-2" :sale-price="safeType?.salePrice || '0'" :regular-price="safeType?.regularPrice || '0'" />
+            <button type="button" @click="scrollToReviews" style="cursor:pointer;display:inline-block;background:none;border:none;padding:0;">
+  <StarRating :rating="product?.averageRating || 0" :count="product?.reviewCount || 0" v-if="storeSettings.showReviews" />
+</button>
           </div>
 
           
@@ -186,7 +197,7 @@ function onAddToCartSuccess() {
   v-html="product.shortDescription"
 />
 
-          <hr />
+
 
           <form @submit.prevent> <!-- AddToCartButton now handles add-to-cart internally -->
             <AttributeSelections
@@ -199,19 +210,31 @@ function onAddToCartSuccess() {
             <div
               v-if="isVariableProduct || isSimpleProduct"
               class="fixed bottom-0 left-0 z-10 flex items-center w-full gap-4 p-4 mt-12 bg-white md:static md:bg-transparent bg-opacity-90 md:p-0">
-              <input
-                v-model="quantity"
-                type="number"
-                min="1"
-                aria-label="Quantity"
-                class="bg-white border rounded-lg flex text-left p-2.5 w-20 gap-4 items-center justify-center focus:outline-none" />
               <AddToCartButton
-  class="flex-1 w-full md:max-w-xs"
-  :disabled="disabledAddToCart"
-  :productInput="selectProductInput"
-  :class="{ loading: isUpdatingCart }"
-  @success="onAddToCartSuccess"
-/>
+                class="w-full py-4 text-lg font-bold rounded-lg bg-green-600 text-white hover:bg-green-400 transition-all duration-200 border-0 shadow-none"
+                :disabled="disabledAddToCart"
+                :productInput="selectProductInput"
+                :class="{ loading: isUpdatingCart }"
+                @success="onAddToCartSuccess"
+              />
+            </div>
+            <!-- Guaranteed Safe Checkout Section -->
+            <div class="w-full mt-4">
+              <div class="flex items-center w-full">
+                <hr class="flex-grow border-gray-200" />
+                <span class="mx-3 text-gray-700 font-medium editable-safe-checkout" contenteditable="true" style="outline:none;cursor:text;">Guaranteed Safe Checkout</span>
+                <hr class="flex-grow border-gray-200" />
+              </div>
+              <div class="flex flex-wrap justify-center items-center gap-3 mt-4">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/stripe.svg" alt="Stripe" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/shopify.svg" alt="Shopify" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5a/AES-256-bit-encryption.svg" alt="AES 256bit" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/paypal.svg" alt="PayPal" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/visa.svg" alt="Visa" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/mastercard.svg" alt="Mastercard" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/discover.svg" alt="Discover" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/americanexpress.svg" alt="American Express" style="height:28px;width:auto;background:#fff;padding:2px;border-radius:4px;" />
+              </div>
             </div>
             <a
               v-if="isExternalProduct && product.externalUrl"
@@ -227,7 +250,7 @@ function onAddToCartSuccess() {
           
         </div>
       </div>
-      <div v-if="product.description || product.reviews" class="my-32">
+      <div v-if="product.description || product.reviews" class="my-32" id="product-reviews">
         <ProductTabs :product />
       </div>
       <div class="my-32" v-if="product.related && storeSettings.showRelatedProducts">

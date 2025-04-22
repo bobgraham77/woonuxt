@@ -1,3 +1,5 @@
+import SupportAssistant from '~/components/SupportAssistant.vue'
+
 <script setup lang="ts">
 const route = useRoute();
 const { isShowingCart, toggleCart } = useCart();
@@ -44,6 +46,7 @@ useHead({
 
     <LazyAppFooter hydrate-on-visible />
   </div>
+  <SupportAssistant />
 </template>
 
 <style lang="postcss">

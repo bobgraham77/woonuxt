@@ -38,7 +38,7 @@ const imagetoDisplay = computed<string>(() => {
 
 <template>
   <div class="relative group">
-    <NuxtLink v-if="node.slug" :to="`/product/${decodeURIComponent(node.slug)}`" :title="node.name">
+    <NuxtLink v-if="node.slug" :to="`/product/${encodeURIComponent(node.slug)}`" :title="node.name">
       <SaleBadge :node class="absolute top-2 right-2" />
       <NuxtImg
         v-if="imagetoDisplay"
@@ -54,8 +54,8 @@ const imagetoDisplay = computed<string>(() => {
         placeholder-class="blur-xl" />
     </NuxtLink>
     <div class="p-2">
-      <StarRating v-if="storeSettings.showReviews" :rating="node.averageRating" :count="node.reviewCount" />
-      <NuxtLink v-if="node.slug" :to="`/product/${decodeURIComponent(node.slug)}`" :title="node.name">
+      <StarRating v-if="storeSettings.showReviews" :rating="node.averageRating" :count="typeof node.reviewCount === 'number' ? node.reviewCount : undefined" />
+      <NuxtLink v-if="node.slug" :to="`/product/${encodeURIComponent(node.slug)}`" :title="node.name">
         <h2 class="mb-2 font-light leading-tight group-hover:text-primary">{{ node.name }}</h2>
       </NuxtLink>
       <ProductPrice class="text-sm" :sale-price="node.salePrice" :regular-price="node.regularPrice" />

@@ -9,7 +9,7 @@ const { wishlistLink } = useAuth();
       <div class="mr-auto">
         <Logo />
         <WebsiteShortDescription />
-        <LangSwitcher class="mt-8" />
+        <!-- <LangSwitcher class="mt-8" /> -->
       </div>
       <div class="w-3/7 lg:w-auto">
         <div class="mb-1 font-semibold">Products</div>

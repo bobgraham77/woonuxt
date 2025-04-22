@@ -8,10 +8,10 @@
           Explorez notre sélection de produits soigneusement choisis pour votre maison et votre style de vie.
         </p>
         <NuxtLink
-          to="/products"
+          to="/product/telechargez-votre-application-obd2-wifi-pro"
           class="inline-block bg-black text-white px-8 py-3 rounded-full font-semibold shadow hover:bg-gray-800 transition"
         >
-          Voir la boutique
+          Voir le produit
         </NuxtLink>
       </div>
       <!-- Bloc droit : Image -->

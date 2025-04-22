@@ -108,6 +108,11 @@
       "orderThanks": "Merci de votre commande. Nous vous enverrons un e-mail avec les détails de la commande.",
       "orderHistory": "Historique des commandes",
       "placeOrder": "Passer la commande",
+      "processingOrder": "Traitement de votre commande...",
+      "orderComplete": "Commande complétée",
+      "messaging": {
+        "order": "Traitement de votre paiement en cours..."
+      },
       "total": "Total",
       "subtotal": "Sous-total",
       "rating": "Note | Notes",
@@ -161,6 +166,11 @@
       "invalidPasswordResetLink": "Le lien de réinitialisation du mot de passe est invalide.",
       "general": "Une erreur est survenue",
       "noOrder": "Impossible de trouver votre commande. Veuillez réessayer plus tard."
-    }
+    },
+    "errorStripeIntent": "Erreur lors de la création du paiement. Merci de vérifier la configuration Stripe ou WooCommerce.",
+    "errorNoPaymentMethod": "Veuillez sélectionner une méthode de paiement.",
+    "errorCartAmount": "Votre panier est vide ou le montant est invalide.",
+    "paymentRedirect": "Vous serez redirigé vers la page de paiement après avoir validé votre commande.",
+    "redirecting": "Redirection vers la page de paiement..."
   }
 }

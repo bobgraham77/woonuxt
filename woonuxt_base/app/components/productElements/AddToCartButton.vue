@@ -1,28 +1,47 @@
 <script setup>
-const { cart } = useCart();
+import { ref, computed, watch } from 'vue';
+const { addToCart, cart } = useCart();
+const emit = defineEmits(['success']);
 const props = defineProps({
   disabled: { type: Boolean, default: false },
+  productInput: { type: Object, required: true },
 });
 const isLoading = ref(false);
+const errorMessage = ref('');
 const { t } = useI18n();
 const addToCartButtonText = computed(() => (isLoading.value ? t('messages.shop.adding') : t('messages.shop.addToCart')));
 
 // stop loading when cart is updated
-watch(cart, (val) => {
+watch(cart, () => {
   isLoading.value = false;
 });
+
+const handleAddToCart = async () => {
+  if (props.disabled || isLoading.value) return;
+  isLoading.value = true;
+  errorMessage.value = '';
+  try {
+    await addToCart(props.productInput);
+    emit('success');
+  } catch (error) {
+    errorMessage.value = t('messages.shop.addToCartError') || 'Error adding to cart.';
+    isLoading.value = false;
+  }
+};
 </script>
 
 <template>
   <button
-    type="submit"
+    type="button"
     class="rounded-lg flex font-bold bg-gray-800 text-white text-center min-w-[150px] p-2.5 gap-4 items-center justify-center focus:outline-none"
-    :class="{ disabled: disabled }"
-    :disabled="disabled"
-    @click="isLoading = true">
+    :class="{ disabled: disabled || isLoading }"
+    :disabled="disabled || isLoading"
+    @click="handleAddToCart"
+  >
     <span>{{ addToCartButtonText }}</span>
     <LoadingIcon v-if="isLoading" stroke="4" size="12" color="#fff" />
   </button>
+  <div v-if="errorMessage" class="text-red-500 text-xs mt-2">{{ errorMessage }}</div>
 </template>
 
 <style lang="postcss" scoped>

@@ -6,31 +6,80 @@ const { storeSettings } = useAppConfig();
 const { arraysEqual, formatArray, checkForVariationTypeOfAny } = useHelpers();
 const { addToCart, isUpdatingCart } = useCart();
 const { t } = useI18n();
-const slug = route.params.slug as string;
+const product = ref<Product | null>(null);
 
-const { data } = await useAsyncGql('getProduct', { slug });
-if (!data.value?.product) {
-  throw showError({ statusCode: 404, statusMessage: t('messages.shop.productNotFound') });
+const error = ref<string | null>(null);
+const loading = ref<boolean>(false);
+
+async function loadProduct() {
+  product.value = null;
+  error.value = null;
+  loading.value = true;
+  try {
+    const slug = decodeURIComponent(route.params.slug as string);
+    console.log('SLUG DEBUG:', slug);
+    const { data } = await useAsyncGql('getProduct', { slug });
+    if (!data.value?.product) {
+      error.value = t('messages.shop.productNotFound') || 'Produit introuvable';
+      return;
+    }
+    product.value = data.value.product;
+  } catch (e) {
+    error.value = t('messages.shop.productNotFound') || 'Produit introuvable';
+  } finally {
+    loading.value = false;
+  }
 }
 
-const product = ref<Product>(data?.value?.product);
+onMounted(loadProduct);
+watch(() => route.params.slug, loadProduct);
 const quantity = ref<number>(1);
 const activeVariation = ref<Variation | null>(null);
 const variation = ref<VariationAttribute[]>([]);
-const indexOfTypeAny = computed<number[]>(() => checkForVariationTypeOfAny(product.value));
+const indexOfTypeAny = computed<number[]>(() => product.value ? checkForVariationTypeOfAny(product.value) : []);
 const attrValues = ref();
 const isSimpleProduct = computed<boolean>(() => product.value?.type === ProductTypesEnum.SIMPLE);
 const isVariableProduct = computed<boolean>(() => product.value?.type === ProductTypesEnum.VARIABLE);
 const isExternalProduct = computed<boolean>(() => product.value?.type === ProductTypesEnum.EXTERNAL);
 
-const type = computed(() => activeVariation.value || product.value);
-const selectProductInput = computed<any>(() => ({ productId: type.value?.databaseId, quantity: quantity.value })) as ComputedRef<AddToCartInput>;
+const safeProduct = computed(() => product.value ?? {});
+const safeType = computed(() => type.value ?? {});
+
+const type = computed<Product>(() => {
+  if (activeVariation.value) return activeVariation.value as Product;
+  if (product.value) return product.value as Product;
+  // Objet "vide" conforme à Product pour garantir le typage strict (structure GraphQL)
+  return {
+    databaseId: 0,
+    id: '',
+    name: '',
+    type: ProductTypesEnum.SIMPLE,
+    slug: '',
+    sku: '',
+    price: '',
+    regularPrice: '',
+    salePrice: '',
+    description: '',
+    shortDescription: '',
+    attributes: { nodes: [] }, // <- structure attendue par GraphQL
+    variations: { nodes: [] }, // <- idem
+    image: undefined,
+    stockStatus: undefined,
+    averageRating: 0,
+    reviewCount: 0,
+    galleryImages: { nodes: [] },
+    terms: { nodes: [] },
+    // Ajoute ici tous les champs requis par Product si besoin
+  };
+});
+const selectProductInput = computed<any>(() => ({ productId: type.value?.databaseId ?? 0, quantity: quantity.value })) as ComputedRef<AddToCartInput>;
 
 const mergeLiveStockStatus = (payload: Product): void => {
+  if (!product.value) return;
   product.value.stockStatus = payload.stockStatus ?? product.value?.stockStatus;
 
   payload.variations?.nodes?.forEach((variation: Variation, index: number) => {
-    if (product.value?.variations?.nodes[index]) {
+    if (product.value?.variations?.nodes && product.value?.variations?.nodes[index]) {
       product.value.variations.nodes[index].stockStatus = variation.stockStatus;
     }
   });
@@ -38,8 +87,10 @@ const mergeLiveStockStatus = (payload: Product): void => {
 
 onMounted(async () => {
   try {
-    const { product } = await GqlGetStockStatus({ slug });
-    if (product) mergeLiveStockStatus(product as Product);
+    if (product.value && typeof product.value.slug === 'string') {
+  const { product: stockProduct } = await GqlGetStockStatus({ slug: product.value.slug });
+  if (stockProduct) mergeLiveStockStatus(stockProduct as Product);
+}
   } catch (error: any) {
     const errorMessage = error?.gqlErrors?.[0].message;
     if (errorMessage) console.error(errorMessage);
@@ -47,9 +98,9 @@ onMounted(async () => {
 });
 
 const updateSelectedVariations = (variations: VariationAttribute[]): void => {
-  if (!product.value.variations) return;
+  if (!product.value || !product.value.variations) return;
 
-  attrValues.value = variations.map((el) => ({ attributeName: el.name, attributeValue: el.value }));
+  attrValues.value = variations.map((el) => ({ attributeName: String(el.name ?? ''), attributeValue: String(el.value ?? '') }));
   const clonedVariations = JSON.parse(JSON.stringify(variations));
   const getActiveVariation = product.value.variations?.nodes.filter((variation: any) => {
     // If there is any variation of type ANY set the value to ''
@@ -83,21 +134,35 @@ const disabledAddToCart = computed(() => {
   const isValidActiveVariation = isVariableProduct.value ? !!activeVariation.value : true;
   return isInvalidType || isOutOfStock || isCartUpdating || !isValidActiveVariation;
 });
+// Handle AddToCartButton success event
+function onAddToCartSuccess() {
+  // Optionally show a toast, message, or auto-open cart here
+  // For now, just log success
+  console.log('Product successfully added to cart!');
+}
 </script>
 
 <template>
   <main class="container relative py-6 xl:max-w-7xl">
-    <div v-if="product">
+    <div v-if="error">
+      <p class="text-red-500 text-center text-lg my-10">{{ error }}</p>
+    </div>
+    <div v-else-if="loading">
+      <div class="flex justify-center items-center my-10">
+        <LoadingIcon size="48" color="#888" />
+      </div>
+    </div>
+    <div v-else-if="product">
       <SEOHead :info="product" />
       <Breadcrumb :product class="mb-6" v-if="storeSettings.showBreadcrumbOnSingleProduct" />
 
       <div class="flex flex-col gap-10 md:flex-row md:justify-between lg:gap-24">
         <ProductImageGallery
-          v-if="product.image"
+          v-if="product && product.image"
           class="relative flex-1"
-          :main-image="product.image"
-          :gallery="product.galleryImages!"
-          :node="type"
+          :main-image="product?.image || {}"
+          :gallery="product?.galleryImages || []"
+          :node="safeType"
           :activeVariation="activeVariation || {}" />
         <NuxtImg v-else class="relative flex-1 skeleton" src="/images/placeholder.jpg" :alt="product?.name || 'Product'" />
 
@@ -105,30 +170,25 @@ const disabledAddToCart = computed(() => {
           <div class="flex justify-between mb-4">
             <div class="flex-1">
               <h1 class="flex flex-wrap items-center gap-2 mb-2 text-2xl font-sesmibold">
-                {{ type.name }}
-                <LazyWPAdminLink :link="`/wp-admin/post.php?post=${product.databaseId}&action=edit`">Edit</LazyWPAdminLink>
+                {{ safeType?.name || '' }}
+                <LazyWPAdminLink :link="`/wp-admin/post.php?post=${product?.databaseId || 0}&action=edit`">Edit</LazyWPAdminLink>
               </h1>
-              <StarRating :rating="product.averageRating || 0" :count="product.reviewCount || 0" v-if="storeSettings.showReviews" />
+              <StarRating :rating="product?.averageRating || 0" :count="product?.reviewCount || 0" v-if="storeSettings.showReviews" />
             </div>
-            <ProductPrice class="text-xl" :sale-price="type.salePrice" :regular-price="type.regularPrice" />
+            <ProductPrice class="text-xl" :sale-price="safeType?.salePrice || '0'" :regular-price="safeType?.regularPrice || '0'" />
           </div>
 
-          <div class="grid gap-2 my-8 text-sm empty:hidden">
-            <div v-if="!isExternalProduct" class="flex items-center gap-2">
-              <span class="text-gray-400">{{ $t('messages.shop.availability') }}: </span>
-              <StockStatus :stockStatus @updated="mergeLiveStockStatus" />
-            </div>
-            <div class="flex items-center gap-2" v-if="storeSettings.showSKU && product.sku">
-              <span class="text-gray-400">{{ $t('messages.shop.sku') }}: </span>
-              <span>{{ product.sku || 'N/A' }}</span>
-            </div>
-          </div>
+          
 
-          <div class="mb-8 font-light prose" v-html="product.shortDescription || product.description" />
+          <div
+  v-if="product.shortDescription"
+  class="mb-8 font-light prose"
+  v-html="product.shortDescription"
+/>
 
           <hr />
 
-          <form @submit.prevent="addToCart(selectProductInput)">
+          <form @submit.prevent> <!-- AddToCartButton now handles add-to-cart internally -->
             <AttributeSelections
               v-if="isVariableProduct && product.attributes && product.variations"
               class="mt-4 mb-8"
@@ -145,7 +205,13 @@ const disabledAddToCart = computed(() => {
                 min="1"
                 aria-label="Quantity"
                 class="bg-white border rounded-lg flex text-left p-2.5 w-20 gap-4 items-center justify-center focus:outline-none" />
-              <AddToCartButton class="flex-1 w-full md:max-w-xs" :disabled="disabledAddToCart" :class="{ loading: isUpdatingCart }" />
+              <AddToCartButton
+  class="flex-1 w-full md:max-w-xs"
+  :disabled="disabledAddToCart"
+  :productInput="selectProductInput"
+  :class="{ loading: isUpdatingCart }"
+  @success="onAddToCartSuccess"
+/>
             </div>
             <a
               v-if="isExternalProduct && product.externalUrl"
@@ -156,29 +222,9 @@ const disabledAddToCart = computed(() => {
             </a>
           </form>
 
-          <div v-if="storeSettings.showProductCategoriesOnSingleProduct && product.productCategories">
-            <div class="grid gap-2 my-8 text-sm">
-              <div class="flex items-center gap-2">
-                <span class="text-gray-400">{{ $t('messages.shop.category', 2) }}:</span>
-                <div class="product-categories">
-                  <NuxtLink
-                    v-for="category in product.productCategories.nodes"
-                    :key="category.databaseId"
-                    :to="`/product-category/${decodeURIComponent(category?.slug || '')}`"
-                    class="hover:text-primary"
-                    :title="category.name"
-                    >{{ category.name }}<span class="comma">, </span>
-                  </NuxtLink>
-                </div>
-              </div>
-            </div>
-            <hr />
-          </div>
+          
 
-          <div class="flex flex-wrap gap-4">
-            <WishlistButton :product />
-            <ShareButton :product />
-          </div>
+          
         </div>
       </div>
       <div v-if="product.description || product.reviews" class="my-32">

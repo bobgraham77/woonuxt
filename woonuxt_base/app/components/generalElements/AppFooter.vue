@@ -12,15 +12,6 @@ const { wishlistLink } = useAuth();
         <LangSwitcher class="mt-8" />
       </div>
       <div class="w-3/7 lg:w-auto">
-        <div class="mb-1 font-semibold">Information</div>
-        <div class="text-sm">
-          <a class="py-1.5 block" href="https://github.com/scottyzen/woonuxt?tab=readme-ov-file#next-generation-front-end-for-woocommerce" target="_blank">About</a>
-          <a href="/" class="py-1.5 block">Careers</a>
-          <a href="/" class="py-1.5 block">Press</a>
-          <a href="https://woonuxt.com/faq" class="py-1.5 block" rel="noreferrer" target="_blank">FAQ's</a>
-        </div>
-      </div>
-      <div class="w-3/7 lg:w-auto">
         <div class="mb-1 font-semibold">Products</div>
         <div class="text-sm">
           <NuxtLink to="/products" class="py-1.5 block">{{ $t('messages.shop.newArrivals') }}</NuxtLink>
@@ -36,15 +27,6 @@ const { wishlistLink } = useAuth();
           <a href="/" class="py-1.5 block">Shipping & Returns</a>
           <a href="/" class="py-1.5 block">Privacy Policy</a>
           <a href="/" class="py-1.5 block">Terms & Conditions</a>
-        </div>
-      </div>
-      <div class="w-3/7 lg:w-auto">
-        <div class="mb-1 font-semibold">{{ $t('messages.account.myAccount') }}</div>
-        <div class="text-sm">
-          <NuxtLink to="/my-account/" class="py-1.5 block">{{ $t('messages.account.myAccount') }}</NuxtLink>
-          <NuxtLink to="/my-account/?tab=orders" class="py-1.5 block">{{ $t('messages.shop.orderHistory') }}</NuxtLink>
-          <NuxtLink :to="wishlistLink" class="py-1.5 block">{{ $t('messages.shop.wishlist') }}</NuxtLink>
-          <a href="/" class="py-1.5 block">{{ $t('messages.general.newsletter') }}</a>
         </div>
       </div>
     </div>

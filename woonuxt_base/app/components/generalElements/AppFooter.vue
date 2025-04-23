@@ -11,7 +11,7 @@ const { wishlistLink } = useAuth();
         <WebsiteShortDescription />
         <!-- <LangSwitcher class="mt-8" /> -->
       </div>
-      <div class="w-3/7 lg:w-auto">
+      <div class="w-3/7 lg:w-auto mr-16">
         <div class="mb-1 font-semibold">Products</div>
         <div class="text-sm">
           <NuxtLink to="/products" class="py-1.5 block">{{ $t('messages.shop.newArrivals') }}</NuxtLink>
@@ -20,7 +20,7 @@ const { wishlistLink } = useAuth();
           <a href="/" class="py-1.5 block">{{ $t('messages.shop.giftCards') }}</a>
         </div>
       </div>
-      <div class="w-3/7 lg:w-auto">
+      <div class="w-3/7 lg:w-auto mr-16">
         <div class="mb-1 font-semibold">{{ $t('messages.general.customerService') }}</div>
         <div class="text-sm">
           <NuxtLink to="/contact" class="py-1.5 block">Contact Us</NuxtLink>
@@ -33,9 +33,7 @@ const { wishlistLink } = useAuth();
     <div class="container border-t flex items-center justify-center mb-4">
       <div class="copywrite">
         <p class="py-4 text-xs text-center">
-          <a href="https://woonuxt.com" :title="`WooNuxt v${wooNuxtVersionInfo}`">{{ `WooNuxt v${wooNuxtVersionInfo}` }}</a> - by
-          <a href="https://scottyzen.com" title="Scott Kennedy - Web Developer" target="_blank">Scott Kennedy</a>
-        </p>
+          © 2025 All Rights Reserved - Road Clique        </p>
       </div>
       <SocialIcons class="ml-auto" />
     </div>

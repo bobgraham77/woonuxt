@@ -23,6 +23,13 @@ watch(
 );
 
 const mainImage = computed<string>(() => props.node?.image?.producCardSourceUrl || props.node?.image?.sourceUrl || '/images/placeholder.jpg');
+
+const safeReviewCount = computed<number | undefined>(() => {
+  if (typeof props.node?.reviewCount === 'number') {
+    return props.node.reviewCount;
+  }
+  return undefined;
+});
 const imagetoDisplay = computed<string>(() => {
   if (paColor.value.length) {
     const activeColorImage = props.node?.variations?.nodes.filter((variation) => {
@@ -54,7 +61,8 @@ const imagetoDisplay = computed<string>(() => {
         placeholder-class="blur-xl" />
     </NuxtLink>
     <div class="p-2">
-      <StarRating v-if="storeSettings.showReviews" :rating="node.averageRating" :count="typeof node.reviewCount === 'number' ? node.reviewCount : undefined" />
+      <!-- @ts-expect-error -->
+      <StarRating v-if="storeSettings.showReviews" :rating="node.averageRating" :count="node.reviewCount" />
       <NuxtLink v-if="node.slug" :to="`/product/${encodeURIComponent(node.slug)}`" :title="node.name">
         <h2 class="mb-2 font-light leading-tight group-hover:text-primary">{{ node.name }}</h2>
       </NuxtLink>

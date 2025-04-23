@@ -1,7 +1,8 @@
 <script setup lang="ts">
-defineProps({
+// Utiliser PropType pour définir un type plus précis
+const props = defineProps({
   rating: { type: Number, default: 0 },
-  count: { type: Number, default: null },
+  count: { type: [Number, null] as PropType<number | null | undefined>, default: undefined },
   hideCount: { type: Boolean, default: false },
   size: { type: Number, default: 14 },
 });

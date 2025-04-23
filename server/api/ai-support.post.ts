@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
       throw new Error('Réponse inattendue de Groq');
     }
 
-    console.log('GROQ_API_KEY:', process.env.GROQ_API_KEY);
+    // console.log('GROQ_API_KEY loaded:', !!process.env.GROQ_API_KEY); // Ne jamais afficher la clé en clair en production !
     return { answer: groqRes.choices[0].message.content as string };
   } catch (error: any) {
     // Log l'erreur détaillée côté serveur

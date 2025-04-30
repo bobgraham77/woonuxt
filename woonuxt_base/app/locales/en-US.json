@@ -109,6 +109,7 @@
       "orderThanks": "Thank you for your order. We will send you an email with the order details.",
       "orderHistory": "Order History",
       "placeOrder": "Place Order",
+      "processingOrder": "Processing Order",
       "total": "Total",
       "subtotal": "Subtotal",
       "rating": "Rating | Ratings",

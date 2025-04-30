@@ -507,7 +507,7 @@ useSeoMeta({
           <button
             class="flex items-center justify-center w-full gap-3 p-3 mt-4 font-semibold text-center text-white rounded-lg shadow-md bg-primary hover:bg-primary-dark disabled:cursor-not-allowed disabled:bg-gray-400"
             :disabled="isCheckoutDisabled">
-            {{ buttonText }}<LoadingIcon v-if="isProcessingOrder" color="#fff" size="18" />
+            {{ buttonText }}<LoadingIcon v-if="isProcessingOrder" color="#4ade80" size="18" />
           </button>
         </OrderSummary>
       </form>

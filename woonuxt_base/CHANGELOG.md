@@ -1,3 +1,34 @@
+## [2025-04-23] – Refactoring, Stripe, Vercel & AI Chat
+
+### Stripe & Secure Payments
+- Added a backend endpoint `/api/stripe-intent` to create Stripe PaymentIntents server-side (using the secret key for improved security).
+- Installed and configured the Stripe module on the backend (`npm install stripe`).
+- Fixed Stripe integration flow: the frontend now calls the backend API to obtain the `clientSecret`.
+- Checked and synchronized Stripe test keys in `.env` (publishable and secret keys).
+- Debugged and resolved "No such setupintent" errors and test/live key issues.
+
+### Security & Logging
+- Removed logs exposing sensitive API keys in endpoints (especially `GROQ_API_KEY`).
+- Verified that no secrets are exposed in server logs.
+
+### Vercel Deployment & Build
+- Fixed build errors related to invalid GraphQL queries (`logout.gql` deleted).
+- Added/configured environment variables on Vercel (GQL_HOST, Stripe, WooCommerce, etc.).
+- Fixed the build issue with `localhost:4000/graphql` by providing the correct GraphQL URL in `.env` and on Vercel.
+- Documented CORS setup for the GraphQL API (WordPress/WPGraphQL).
+
+### AI Chat & UI
+- Redesigned the floating chat button: lightning icon, green gradient background, Messenger-style, hover animation.
+- Fixed avatar and chat bubble display in the assistant chat.
+- Added a confirmation message after contacting support.
+
+### Miscellaneous & Maintenance
+- Code cleanup, removed obsolete files (`logout.gql`).
+- Recommendations on using npm vs pnpm/yarn for this project.
+- Documentation and guidance throughout the deployment and debugging process.
+
+---
+
 ## [2025-04-23] – Recent Improvements and Integrations
 
 ### Initial Project Setup and Stripe Integration (April 2025)
